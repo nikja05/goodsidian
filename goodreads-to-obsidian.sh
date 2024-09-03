@@ -5,12 +5,12 @@
 # clicking the "RSS" button at the bottom of the page.
 
 # url for "Currently reading":
-url="https://www.goodreads.com/url-to-your-rss-feed-shelf=currently-reading"
+url="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=currently-reading"
 # url for "Read":
-readurl="https://www.goodreads.com/url-to-your-rss-feed-shelf=read"
+readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # Enter the path to your Vault
-vaultpath="Path/to/your/vault"
+vaultpath="C:\Users\Nikolaj Veljkovic\OneDrive - Gymnasium Kirchenfeld\Documents\Second Brain\200 Notes"
 
 
 # Assign times to variables
@@ -21,7 +21,7 @@ month=$(date +%B)
 # This grabs the data from the currently reading rss feed and formats it
 IFS=$'\n' feed=$(curl --silent "$url" | grep -E '(title>|book_large_image_url>|author_name>|book_published>|book_id>)' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
--e 's/Joschua.s bookshelf: currently-reading//' \
+-e 's/THE Bookshelf: currently-reading//' \
 -e 's/<book_large_image_url>//' -e 's/<\/book_large_image_url>/ | /' \
 -e 's/<title>//' -e 's/<\/title>/ | /' \
 -e 's/<author_name>//' -e 's/<\/author_name>/ | /' \
@@ -95,7 +95,7 @@ unset new_array
 bookamount=$( expr "${#arr[@]}" / 5)
 
 if (( "$bookamount" == 0 )); then
-  osascript -e "display notification \"No new books found.\" with title \"Currently-reading: No update\""
+  echo "Currently-reading: No new books found."
 fi
 
 # Start the loop for each book
@@ -119,23 +119,29 @@ cleantitle=$(echo "${title}" | sed -e 's/\///' -e 's/:/ –/' -e 's/#//')
 
   if [[ "$cleantitle" == "" ]];
   then
-    osascript -e "display notification \"Failed to create note due to empty array.\" with title \"Error!\""
+    echo "Error! Failed to create note due to empty array."
   else
     echo "---
 bookid: ${bookid}
 ---
+links: [[Books]]
+status: #book, #currently-reading
+tags: 
 
-links: [[Books MOC]]
-#currently-reading
 # ${title}
+
 ![b|150](${imglink})
-* Type: #book/
+
 * Universe/Series: ADD SERIES
 * Author: [[${author}]]
-* Year published: [[${pub}]]" >> "${vaultpath}/${cleantitle}.md"
+* Year published: [[${pub}]]
 
+
+
+---
+# References" >> "${vaultpath}/${cleantitle}.md"
     # Display a notification when creating the file
-    osascript -e "display notification \"Booknote created!\" with title \"${cleantitle//\"/\\\"}\""
+    echo "display notification \"Booknote created!\" with title \"${cleantitle//\"/\\\"}\""
   fi
 
 done
@@ -155,10 +161,10 @@ then
 
   # Grab the name of the changed book
   fname=$(echo ${fname} | sed 's/^.*\///' | sed 's/\.[^.]*$//')
-  osascript -e "display notification \"${fname}\" with title \"Updated read books\""
+  echo "Updated read books ${fname}"
 else
  # code if not found: No new books
- osascript -e "display notification \"No new read books.\" with title \"Read: No update\""
+ echo "Read: No new read books."
 fi
 
 for (( i = 0 ; i < ${#readarr[@]} ; i++ ))
@@ -185,7 +191,7 @@ do
         declare -i updatedbooks; updatedbooks+=1
         fname=$(echo ${fname} | sed 's/^.*\///' | sed 's/\.[^.]*$//')
         # Show notification
-        osascript -e "display notification \"${fname}\" with title \"Updated read books\""
+        echo -e "Updated read books ${fname}"
       fi
   fi
 done
@@ -193,5 +199,5 @@ done
 # code if not found: No new books
 if [[ ${updatedbooks} = "" ]]
 then
-osascript -e "display notification \"No new read books.\" with title \"Read: No update\""
+echo "No new read books."
 fi
