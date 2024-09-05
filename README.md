@@ -1,14 +1,7 @@
 # Goodsidian 
 Goodsidian takes updates to your shelves on [Goodreads](https://www.goodreads.com/) and formats them to a note in [Obsidian](https://obsidian.md/).
 
-> You can help me keep creating tools like this by [buying me a coffee](https://www.buymeacoffee.com/joschua).
-
-<a href="https://www.buymeacoffee.com/joschua" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height= "48" width="173"></a>
-
-## Help wanted! 🤝
-I'd love to turn this into a proper plugin for Obsidian but my TypeScript knowledge is pretty *lacking*. 
-
-If you'd like to collaborate/contribute on that, head to the [Goodsidian plugin](https://github.com/selfire1/goodsidian-plugin) repo and reach out!
+**FYI**: This script is a fork, modified to work with Windows.
 
 ## Overview
 Goodsidian extracts data from your "currently-reading" and "read" Goodreads rss feeds. That data then gets formatted and creates (if a new book) or updates (if book is read) a note in your Obsidian vault.
@@ -18,10 +11,6 @@ Goodsidian extracts data from your "currently-reading" and "read" Goodreads rss 
 
 **Disclaimer**: Never run a script without knowing what it does. Make sure you understand the script and back up your vault. I use this script on my own vault but cannot guarantee no data losses or unintended changes.
 
-If you find value in this resource, consider sponsoring my next read on Patreon.
-
-## Setting up the script
-This master branch of this script is written for bash on MacOS. Thanks to [bboerzel](https://github.com/selfire1/goodsidian/issues/1)'s contribution you can find the script for linux bash on [another branch](https://github.com/selfire1/goodsidian/tree/linux-bash).
 
 ## Variables
 You can find the url to your Goodreads RSS feed by navigating to one of your shelfes and clicking the "RSS" button at the bottom of the page.
