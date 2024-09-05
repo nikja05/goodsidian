@@ -113,7 +113,7 @@ do
 
 
 # Delete illegal (':' and '/') and unwanted ('#') characters
-cleantitle=$(echo "${title}" | sed -e 's/\///' -e 's/:/ –/' -e 's/#//')
+cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ –/' -e 's/#/\')
 
   # Write the contents for the book file
 
@@ -139,7 +139,7 @@ tags:
 
 
 ---
-# References" >> "${vaultpath}/${cleantitle}.md"
+# References" >> "${vaultpath}\\${cleantitle}.md"
     # Display a notification when creating the file
     echo "display notification \"Booknote created!\" with title \"${cleantitle//\"/\\\"}\""
   fi
@@ -173,10 +173,10 @@ do
   cbookid=${readarr["$i"]}
 
   # If in the path to the vault, there is a file with the current id, then …
-  if find "${vaultpath}" -not -path "*/\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}"
+  if find "${vaultpath}" -not -path "*\\\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}"
   then
   # … set variable fname to that file
-  fname=$(find "${vaultpath}" -not -path "*/\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}")
+  fname=$(find "${vaultpath}" -not -path "*\\\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}")
     # Check if it has tag "#currently-reading"
       if grep "#currently-reading" "${fname}"
       then
