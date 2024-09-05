@@ -21,7 +21,7 @@ month=$(date +%B)
 # This grabs the data from the currently reading rss feed and formats it
 IFS=$'\n' feed=$(curl --silent "$url" | grep -E '(title>|book_large_image_url>|author_name>|book_published>|book_id>)' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
--e 's/THE Bookshelf: currently-reading//' \
+-e 's/Nikolaj.s Bookshelf: currently-reading//' \
 -e 's/<book_large_image_url>//' -e 's/<\/book_large_image_url>/ | /' \
 -e 's/<title>//' -e 's/<\/title>/ | /' \
 -e 's/<author_name>//' -e 's/<\/author_name>/ | /' \
