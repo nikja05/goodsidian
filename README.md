@@ -14,7 +14,7 @@ Goodsidian extracts data from your "currently-reading" and "read" Goodreads rss 
 
 ## Variables
 You can find the url to your Goodreads RSS feed by navigating to one of your shelfes and clicking the "RSS" button at the bottom of the page.
-* for `url` enter the Goodreads rss url for the "currently-reading" shelf
+* for `readingurl` enter the Goodreads rss url for the "currently-reading" shelf
 * for `readurl` enter the Goodreads rss url for the "read" shelf
 * for `vaultpath` enter the path to your vault
 
