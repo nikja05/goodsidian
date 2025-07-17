@@ -46,18 +46,15 @@ fmt
 readingarr=$(echo $readingfeed | tr "|" "\n")
 readarr=$(echo $readfeed | tr "|" "\n")
 
-# Remove whitespace on each element: CURRENTLY-READING
+# Remove tabs at the beginning and end of item
 for (( i = 0 ; i < ${#readingarr[@]} ; i++ ))
 do
   readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
-
-# Remove whitespace on each element: READ
 for (( i = 0 ; i < ${#readarr[@]} ; i++ ))
 do
   readarr[$i]=$(echo "${readarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
-
 
 # Get the amount of books by dividing array by 5
 bookamount=$( expr "${#readingarr[@]}" / 5)
