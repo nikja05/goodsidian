@@ -12,7 +12,6 @@ readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UE
 # Enter the path to your Vault
 vaultpath="G:\My Drive\personal\Second Brain\200 Notes"
 
-
 # Get current date and assign to variable
 year=$(date +%Y) # yyyy
 nummonth=$(date +%m) # mm
@@ -21,7 +20,7 @@ month=$(date +%B) # Mon
 # Grabs the data from the currently reading rss feed and removes all HTML and tabs
 # sed -e 's/contenttoreplace/contenttoinsert/'
 IFS=$'\n' 
-feed=$(curl --silent "$readingurl" | \
+readingfeed=$(curl --silent "$readingurl" | \
 egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
 -e 's/Nikolaj.s Bookshelf: currently-reading//' \
@@ -43,14 +42,14 @@ sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 fmt
 )
 
-# Turn the data into an array
-readingarr=($(echo $feed | tr "|" "\n")) # CURRENTLY-READING
-readarr=($(echo $readfeed | tr "|" "\n")) # READ
+# Turn the data into an array, by substituting '|' for a new-line character
+readingarr=$(echo $readingfeed | tr "|" "\n")
+readarr=$(echo $readfeed | tr "|" "\n")
 
 # Remove whitespace on each element: CURRENTLY-READING
-for (( i = 0 ; i < ${#arr[@]} ; i++ ))
+for (( i = 0 ; i < ${#readingarr[@]} ; i++ ))
 do
-  arr[$i]=$(echo "${arr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+  readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 
 # Remove whitespace on each element: READ
@@ -61,7 +60,7 @@ done
 
 
 # Get the amount of books by dividing array by 5
-bookamount=$( expr "${#arr[@]}" / 5)
+bookamount=$( expr "${#readingarr[@]}" / 5)
 
 for (( i = 0 ; i < ${bookamount} ; i++ ))
 do
@@ -69,18 +68,18 @@ do
   counter=$( expr "$i" \* 5)
 
   # Set variables
-  bookid=${arr[$( expr "$counter" + 1)]}
+  bookid=${readingarr[$( expr "$counter" + 1)]}
 
 # Check if book already exists in note by bookid
     
     if grep -q "${bookid}" -r "${vaultpath}"
       then
         # code if found
-          unset arr["$counter"]
-          unset arr[$( expr "$counter" + 1)]
-          unset arr[$( expr "$counter" + 2)]
-          unset arr[$( expr "$counter" + 3)]
-          unset arr[$( expr "$counter" + 4)]
+          unset readingarr["$counter"]
+          unset readingarr[$( expr "$counter" + 1)]
+          unset readingarr[$( expr "$counter" + 2)]
+          unset readingarr[$( expr "$counter" + 3)]
+          unset readingarr[$( expr "$counter" + 4)]
 
        # code if not found
 
@@ -88,14 +87,14 @@ do
 done
 
 # Reindex array to take away gaps
-for i in "${!arr[@]}"; do
-    new_array+=( "${arr[i]}" )
+for i in "${!readingarr[@]}"; do
+    new_array+=( "${readingarr[i]}" )
 done
-arr=("${new_array[@]}")
+readingarr=("${new_array[@]}")
 unset new_array
 
 # Get the amount of books by dividing array by 5
-bookamount=$( expr "${#arr[@]}" / 5)
+bookamount=$( expr "${#readingarr[@]}" / 5)
 
 if (( "$bookamount" == 0 )); then
   echo "Currently-reading: No new books found."
@@ -108,11 +107,11 @@ do
   counter=$( expr "$i" \* 5)
 
   # Set variables
-  title=${arr["$counter"]}
-  bookid=${arr[$( expr "$counter" + 1)]}
-  imglink=${arr[$( expr "$counter" + 2)]}
-  author=${arr[$( expr "$counter" + 3)]}
-  pub=${arr[$( expr "$counter" + 4)]}
+  title=${readingarr["$counter"]}
+  bookid=${readingarr[$( expr "$counter" + 1)]}
+  imglink=${readingarr[$( expr "$counter" + 2)]}
+  author=${readingarr[$( expr "$counter" + 3)]}
+  pub=${readingarr[$( expr "$counter" + 4)]}
 
 
 # Delete illegal (':' and '/') and unwanted ('#') characters
