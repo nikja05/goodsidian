@@ -1,25 +1,28 @@
 #!/bin/sh
 
 # Enter urls to your goodreads rss feed below.
-# You can find it by navigating to one of your goodreads shelves and
+# -> Find it by navigating to one of your goodreads shelves and
 # clicking the "RSS" button at the bottom of the page.
 
 # url for "Currently reading":
-url="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=currently-reading"
+readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=currently-reading"
 # url for "Read":
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # Enter the path to your Vault
-vaultpath="C:\Users\Nikolaj Veljkovic\OneDrive - Gymnasium Kirchenfeld\Documents\Second Brain\200 Notes"
+vaultpath="G:\My Drive\personal\Second Brain\200 Notes"
 
 
-# Assign times to variables
-year=$(date +%Y)
-nummonth=$(date +%m)
-month=$(date +%B)
+# Get current date and assign to variable
+year=$(date +%Y) # yyyy
+nummonth=$(date +%m) # mm
+month=$(date +%B) # Mon
 
-# This grabs the data from the currently reading rss feed and formats it
-IFS=$'\n' feed=$(curl --silent "$url" | grep -E '(title>|book_large_image_url>|author_name>|book_published>|book_id>)' | \
+# Grabs the data from the currently reading rss feed and removes all HTML and tabs
+# sed -e 's/contenttoreplace/contenttoinsert/'
+IFS=$'\n' 
+feed=$(curl --silent "$readingurl" | \
+egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
 -e 's/Nikolaj.s Bookshelf: currently-reading//' \
 -e 's/<book_large_image_url>//' -e 's/<\/book_large_image_url>/ | /' \
@@ -29,19 +32,19 @@ sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
 -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 tail +3 | \
-fmt
+fmt -u
 )
 
-
 # Grab the bookid from READ data from the url and format it
-IFS=$'\n' readfeed=$(curl --silent "$readurl" | grep -E '(book_id>)' | \
+IFS=$'\n' 
+readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
 sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 fmt
 )
 
 # Turn the data into an array
-arr=($(echo $feed | tr "|" "\n")) # CURRENTLY-READING
+readingarr=($(echo $feed | tr "|" "\n")) # CURRENTLY-READING
 readarr=($(echo $readfeed | tr "|" "\n")) # READ
 
 # Remove whitespace on each element: CURRENTLY-READING
