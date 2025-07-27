@@ -111,9 +111,8 @@ do
   author=${readingarr[$(($counter + 3))]}
   published=${readingarr[$(($counter + 4))]}
 
-
-# Delete illegal (':' and '/') and unwanted ('#') characters
-cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ –/' -e 's/#/\')
+  # Delete illegal (':' and '/') and unwanted ('#') characters
+  cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ /-/' -e 's/#/')
 
   # Write the contents for the book file
 
