@@ -10,7 +10,7 @@ readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # Enter the path to your Vault
-vaultpath="G:\My Drive\personal\Second Brain\200 Notes"
+vaultpath="G:\My Drive\personal\Second Brain\100 Reference notes"
 
 # Get current date and assign to variable
 year=$(date +%Y) # yyyy
@@ -60,23 +60,23 @@ readingamount=$(expr "${#readingarr[@]}" / 5)
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
   # Create a temporary counter to loop through books
+  # Multiplied by 5 because there are five fields
   counter=$(expr "$i" \* 5)
 
-  # Set variables
+  # Sets bookid
   bookid=${readingarr[$(expr "$counter" + 1)]}
 
-# Check if book already exists in note by bookid
-    
-    if grep -q "${bookid}" -r "${vaultpath}"
-      then
-        # code if found
-        unset readingarr["$counter"]
-        unset readingarr[$(expr "$counter" + 1)]
-        unset readingarr[$(expr "$counter" + 2)]
-        unset readingarr[$(expr "$counter" + 3)]
-        unset readingarr[$(expr "$counter" + 4)]
-        echo "Book '${readingarr["$counter"]}' already exists"
-    fi
+  # grep scans the whole note for an appearance of bookid
+  if grep -q "${bookid}" -r "${vaultpath}"
+    then
+      # code if found
+      unset readingarr["$counter"]
+      unset readingarr[$(expr "$counter" + 1)]
+      unset readingarr[$(expr "$counter" + 2)]
+      unset readingarr[$(expr "$counter" + 3)]
+      unset readingarr[$(expr "$counter" + 4)]
+      echo "Book '${readingarr["$counter"]}' already exists"
+  fi
 done
 
 # readingarr now might have gaps, because of unset values
