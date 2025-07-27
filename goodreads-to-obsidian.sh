@@ -75,6 +75,7 @@ do
         unset readingarr[$( expr "$counter" + 2)]
         unset readingarr[$( expr "$counter" + 3)]
         unset readingarr[$( expr "$counter" + 4)]
+        echo "Book '${readingarr["$counter"]}' already exists"
     fi
 done
 
