@@ -81,7 +81,8 @@ done
 
 # readingarr now might have gaps, because of unset values
 # Creates an updated array with no gaps
-for i in "${!readingarr[@]}"; do
+for i in "${!readingarr[@]}"
+do
     new_array+=( "${readingarr[i]}" )
 done
 readingarr=("${new_array[@]}")
@@ -90,7 +91,9 @@ unset new_array
 # Get the amount of books by dividing array by 5
 readingamount=$( expr "${#readingarr[@]}" / 5)
 
-if (( "$readingamount" == 0 )); then
+# TODO continue from here on
+if (( "$readingamount" == 0 ))
+  then
   echo "Currently Reading: No new books found."
 fi
 
