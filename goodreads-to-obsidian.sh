@@ -91,7 +91,7 @@ unset new_array
 readingamount=$( expr "${#readingarr[@]}" / 5)
 
 if (( "$readingamount" == 0 )); then
-  echo "Currently-reading: No new books found."
+  echo "Currently Reading: No new books found."
 fi
 
 # Start the loop for each book
