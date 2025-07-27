@@ -55,27 +55,27 @@ do
 done
 
 # Get the amount of books by dividing array by 5
-readingamount=$(expr "${#readingarr[@]}" / 5)
+readingamount=$((${#readingarr[@]} / 5))
 
 # Check if book is in directory
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
   # Create a temporary counter to loop through books
   # Multiplied by 5 because there are five fields
-  counter=$(expr "$i" \* 5)
+  counter=$(($i * 5))
 
   # Sets bookid
-  bookid=${readingarr[$(expr "$counter" + 1)]}
+  bookid=${readingarr[$(($counter + 1))]}
 
   # grep scans all notes for an appearance of bookid
   if grep -q "${bookid}" -r "${vaultpath}"
     then
       # code if found
       unset readingarr["$counter"]
-      unset readingarr[$(expr "$counter" + 1)]
-      unset readingarr[$(expr "$counter" + 2)]
-      unset readingarr[$(expr "$counter" + 3)]
-      unset readingarr[$(expr "$counter" + 4)]
+      unset readingarr[$(($counter + 1))]
+      unset readingarr[$(($counter + 2))]
+      unset readingarr[$(($counter + 3))]
+      unset readingarr[$(($counter + 4))]
       echo "Book '${readingarr["$counter"]}' already exists"
   fi
 done
@@ -90,7 +90,7 @@ readingarr=("${new_array[@]}")
 unset new_array
 
 # Get the amount of books by dividing array by 5
-readingamount=$(expr "${#readingarr[@]}" / 5)
+readingamount=$((${#readingarr[@]} / 5))
 
 if (("$readingamount" == 0))
   then
@@ -102,14 +102,14 @@ for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
   # Create a temporary counter to loop through books
   # Multiplied by 5 because there are five fields
-  counter=$(expr "$i" \* 5)
+  counter=$(($i * 5))
 
   # Set variables
   title=${readingarr["$counter"]}
-  bookid=${readingarr[$(expr "$counter" + 1)]}
-  imglink=${readingarr[$(expr "$counter" + 2)]}
-  author=${readingarr[$(expr "$counter" + 3)]}
-  pub=${readingarr[$(expr "$counter" + 4)]}
+  bookid=${readingarr[$(($counter + 1))]}
+  imglink=${readingarr[$(($counter + 2))]}
+  author=${readingarr[$(($counter + 3))]}
+  pub=${readingarr[$(($counter + 4))]}
 
 
 # Delete illegal (':' and '/') and unwanted ('#') characters
