@@ -19,8 +19,7 @@ month=$(date +%B) # Mon
 
 # Grabs the data from the currently reading rss feed and removes all HTML and tabs
 # sed -e 's/contenttoreplace/contenttoinsert/'
-IFS=$'\n' 
-readingfeed=$(curl --silent "$readingurl" | \
+IFS=$'\n' readingfeed=$(curl --silent "$readingurl" | \
 egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
 -e 's/Nikolaj.s Bookshelf: currently-reading//' \
@@ -35,16 +34,15 @@ fmt -u
 )
 
 # Grab the bookid from READ data from the url and format it
-IFS=$'\n' 
-readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
+IFS=$'\n' readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
 sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 fmt
 )
 
 # Turn the data into an array, by substituting '|' for a new-line character
-readingarr=$(echo $readingfeed | tr "|" "\n")
-readarr=$(echo $readfeed | tr "|" "\n")
+readingarr=($(echo $readingfeed | tr "|" "\n")) # outer pair of brackets is necessary for array definition
+readarr=($(echo $readfeed | tr "|" "\n"))
 
 # Remove tabs at the beginning and end of item
 for (( i = 0 ; i < ${#readingarr[@]} ; i++ ))
@@ -52,14 +50,14 @@ do
   readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 for (( i = 0 ; i < ${#readarr[@]} ; i++ ))
-do
+do  
   readarr[$i]=$(echo "${readarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 
 # Get the amount of books by dividing array by 5
-bookamount=$( expr "${#readingarr[@]}" / 5)
+readingamount=$( expr "${#readingarr[@]}" / 5)
 
-for (( i = 0 ; i < ${bookamount} ; i++ ))
+for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
   # Create a temporary counter to loop through books
   counter=$( expr "$i" \* 5)
@@ -91,14 +89,14 @@ readingarr=("${new_array[@]}")
 unset new_array
 
 # Get the amount of books by dividing array by 5
-bookamount=$( expr "${#readingarr[@]}" / 5)
+readingamount=$( expr "${#readingarr[@]}" / 5)
 
-if (( "$bookamount" == 0 )); then
+if (( "$readingamount" == 0 )); then
   echo "Currently-reading: No new books found."
 fi
 
 # Start the loop for each book
-for (( i = 0 ; i < ${bookamount} ; i++ ))
+for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
 
   counter=$( expr "$i" \* 5)
