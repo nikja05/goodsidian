@@ -57,6 +57,7 @@ done
 # Get the amount of books by dividing array by 5
 readingamount=$(expr "${#readingarr[@]}" / 5)
 
+# Check if book is in directory
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
   # Create a temporary counter to loop through books
@@ -66,7 +67,7 @@ do
   # Sets bookid
   bookid=${readingarr[$(expr "$counter" + 1)]}
 
-  # grep scans the whole note for an appearance of bookid
+  # grep scans all notes for an appearance of bookid
   if grep -q "${bookid}" -r "${vaultpath}"
     then
       # code if found
@@ -83,7 +84,7 @@ done
 # Creates an updated array with no gaps
 for i in "${!readingarr[@]}"
 do
-    new_array+=( "${readingarr[i]}" )
+    new_array+=("${readingarr[i]}")
 done
 readingarr=("${new_array[@]}")
 unset new_array
@@ -91,16 +92,16 @@ unset new_array
 # Get the amount of books by dividing array by 5
 readingamount=$(expr "${#readingarr[@]}" / 5)
 
-# TODO continue from here on
-if (( "$readingamount" == 0 ))
+if (("$readingamount" == 0))
   then
   echo "Currently Reading: No new books found."
 fi
 
-# Start the loop for each book
+# Creates a note for each book
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
-
+  # Create a temporary counter to loop through books
+  # Multiplied by 5 because there are five fields
   counter=$(expr "$i" \* 5)
 
   # Set variables
