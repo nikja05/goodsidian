@@ -109,7 +109,7 @@ do
   bookid=${readingarr[$(($counter + 1))]}
   imglink=${readingarr[$(($counter + 2))]}
   author=${readingarr[$(($counter + 3))]}
-  pub=${readingarr[$(($counter + 4))]}
+  published=${readingarr[$(($counter + 4))]}
 
 
 # Delete illegal (':' and '/') and unwanted ('#') characters
@@ -134,7 +134,7 @@ tags:
 
 * Universe/Series: ADD SERIES
 * Author: [[${author}]]
-* Year published: [[${pub}]]
+* Year published: [[${published}]]
 
 
 
