@@ -70,15 +70,14 @@ do
   bookid=${readingarr[$(($counter + 1))]}
 
   # grep scans all notes for an appearance of bookid
-  if grep -q "${bookid}" -r "${vaultpath}"
-    then
-      # code if found
-      unset readingarr["$counter"]
-      unset readingarr[$(($counter + 1))]
-      unset readingarr[$(($counter + 2))]
-      unset readingarr[$(($counter + 3))]
-      unset readingarr[$(($counter + 4))]
-      echo "Book '${readingarr["$counter"]}' already exists"
+  if grep -q "${bookid}" -r "${vaultpath}"; then
+    # code if found
+    unset readingarr["$counter"]
+    unset readingarr[$(($counter + 1))]
+    unset readingarr[$(($counter + 2))]
+    unset readingarr[$(($counter + 3))]
+    unset readingarr[$(($counter + 4))]
+    echo "Book '${readingarr["$counter"]}' already exists"
   fi
 done
 
@@ -94,11 +93,10 @@ unset new_array
 # Get the amount of books by dividing array by 5
 readingamount=$((${#readingarr[@]} / 5))
 
-if (("$readingamount" == 0))
-  then
-    echo "Currently Reading: No new books found."
-  else
-    echo "Starting Process..."
+if (("$readingamount" == 0)); then
+  echo "Currently Reading: No new books found."
+else
+  echo "Starting Process..."
 fi
 
 # Creates a note for each book
@@ -122,11 +120,10 @@ do
   creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
 
   # Write the contents for the book file
-  if [[ "$cleantitle" == "" ]];
-    then
-      echo "Error! Failed to create note due to faulty title."
-    else
-      echo "---
+  if [[ "$cleantitle" == "" ]]; then
+    echo "Error! Failed to create note due to faulty title."
+  else
+    echo "---
 bookid: '${bookid}'
 ---
 ${creationdate}
