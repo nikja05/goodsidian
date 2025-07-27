@@ -1,4 +1,6 @@
 #!/bin/sh
+# Disables history expansion that would throw an error
+# set +H
 
 # Enter urls to your goodreads rss feed below.
 # -> Find it by navigating to one of your goodreads shelves and
@@ -10,7 +12,7 @@ readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # Enter the path to your Vault
-vaultpath="G:\My Drive\personal\Second Brain\100 Reference notes"
+vaultpath="G:\My Drive\personal\Second Brain\200 test"
 
 # Get current date and assign to variable
 year=$(date +%Y) # yyyy
@@ -94,7 +96,9 @@ readingamount=$((${#readingarr[@]} / 5))
 
 if (("$readingamount" == 0))
   then
-  echo "Currently Reading: No new books found."
+    echo "Currently Reading: No new books found."
+  else
+    echo "Starting Process..."
 fi
 
 # Creates a note for each book
@@ -112,38 +116,38 @@ do
   published=${readingarr[$(($counter + 4))]}
 
   # Delete illegal (':' and '/') and unwanted ('#') characters
-  cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ /-/' -e 's/#/')
+  cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ / - /' -e 's/#//')
 
   # Time of note creation
   creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
 
   # Write the contents for the book file
-  if [["$cleantitle" == ""]];
+  if [[ "$cleantitle" == "" ]];
     then
       echo "Error! Failed to create note due to faulty title."
     else
       echo "---
-bookid: ${bookid}
+bookid: '${bookid}'
 ---
 ${creationdate}
 Status: #reference #currently-reading
 Tags: [[Book]]
 Author: [[${author}]]
-Year published: [[${published}]]
-Universe/Series: ADD SERIES
+Year published: ${published}
+Universe/Series: *ADD SERIES*
 Link to reference:
-# 📚${title}
+# 📚${cleantitle}
 
-![Cover|150](${imglink})
+'![Cover|150](${imglink})'
 
 ---
-" >> "${vaultpath}\\${cleantitle}.md"
-    # Display a notification when creating the file
+" >> "${vaultpath}/${cleantitle}.md"
+    # Display a notification when file was created
     echo "Booknote created with title '${cleantitle}'"
   fi
 done
 
-ifbookid=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}")
+ifbookid=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${readarr}")
 ifcurrread=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "#currently-reading")
 
 if find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}"
