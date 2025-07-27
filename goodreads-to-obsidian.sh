@@ -50,7 +50,7 @@ do
   readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 for (( i = 0 ; i < ${#readarr[@]} ; i++ ))
-do  
+do
   readarr[$i]=$(echo "${readarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 
@@ -70,15 +70,12 @@ do
     if grep -q "${bookid}" -r "${vaultpath}"
       then
         # code if found
-          unset readingarr["$counter"]
-          unset readingarr[$( expr "$counter" + 1)]
-          unset readingarr[$( expr "$counter" + 2)]
-          unset readingarr[$( expr "$counter" + 3)]
-          unset readingarr[$( expr "$counter" + 4)]
-
-       # code if not found
-
-     fi
+        unset readingarr["$counter"]
+        unset readingarr[$( expr "$counter" + 1)]
+        unset readingarr[$( expr "$counter" + 2)]
+        unset readingarr[$( expr "$counter" + 3)]
+        unset readingarr[$( expr "$counter" + 4)]
+    fi
 done
 
 # Reindex array to take away gaps
