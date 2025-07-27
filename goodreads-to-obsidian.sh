@@ -79,7 +79,8 @@ do
     fi
 done
 
-# Reindex array to take away gaps
+# readingarr now might have gaps, because of unset values
+# Creates an updated array with no gaps
 for i in "${!readingarr[@]}"; do
     new_array+=( "${readingarr[i]}" )
 done
