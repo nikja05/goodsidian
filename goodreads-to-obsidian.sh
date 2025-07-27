@@ -114,35 +114,33 @@ do
   # Delete illegal (':' and '/') and unwanted ('#') characters
   cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ /-/' -e 's/#/')
 
-  # Write the contents for the book file
+  # Time of note creation
+  creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
 
-  if [[ "$cleantitle" == "" ]];
-  then
-    echo "Error! Failed to create note due to empty array."
-  else
-    echo "---
+  # Write the contents for the book file
+  if [["$cleantitle" == ""]];
+    then
+      echo "Error! Failed to create note due to faulty title."
+    else
+      echo "---
 bookid: ${bookid}
 ---
-links: [[Books]]
-status: #book, #currently-reading
-tags: 
+${creationdate}
+Status: #reference #currently-reading
+Tags: [[Book]]
+Author: [[${author}]]
+Year published: [[${published}]]
+Universe/Series: ADD SERIES
+Link to reference:
+# 📚${title}
 
-# ${title}
-
-![b|150](${imglink})
-
-* Universe/Series: ADD SERIES
-* Author: [[${author}]]
-* Year published: [[${published}]]
-
-
+![Cover|150](${imglink})
 
 ---
-# References" >> "${vaultpath}\\${cleantitle}.md"
+" >> "${vaultpath}\\${cleantitle}.md"
     # Display a notification when creating the file
-    echo "display notification \"Booknote created!\" with title \"${cleantitle//\"/\\\"}\""
+    echo "Booknote created with title '${cleantitle}'"
   fi
-
 done
 
 ifbookid=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}")
