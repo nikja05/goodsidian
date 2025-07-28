@@ -144,7 +144,18 @@ Link to reference:
   fi
 done
 
-ifbookid=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${readarr}")
+for i in ${!readarr[@]}
+do
+  
+  readbookpath=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "bookid: \"${readarr[$i]}\"")
+  if [ "$readbookpath" != "" ]; then
+    year=$(date +%Y)
+    sed -i -e '/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}' "$readbookpath"
+    sed -i -e 's/#currently-reading/#read/' "$readbookpath"
+  fi
+done
+
+
 ifcurrread=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "#currently-reading")
 
 if find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}"
