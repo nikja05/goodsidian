@@ -1,6 +1,4 @@
 #!/bin/sh
-# Disables history expansion that would throw an error
-# set +H
 
 # Enter urls to your goodreads rss feed below.
 # -> Find it by navigating to one of your goodreads shelves and
@@ -148,11 +146,13 @@ for i in ${!readarr[@]}
 do
   
   readbookpath=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "bookid: \"${readarr[$i]}\"")
+
   if [ "$readbookpath" != "" ]; then
     year=$(date +%Y)
     sed -i -e '/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}' "$readbookpath"
     sed -i -e 's/#currently-reading/#read/' "$readbookpath"
   fi
+
 done
 
 
