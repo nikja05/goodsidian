@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# Enter urls to your goodreads rss feed below.
+# Enter URLs to your goodreads rss feed below.
 # -> Find it by navigating to one of your goodreads shelves and
 # clicking the "RSS" button at the bottom of the page.
 
-# url for "Currently reading":
+# URL for "Currently reading":
 readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=currently-reading"
-# url for "Read":
+# URL for "Read":
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # Enter the path to your Vault
@@ -18,7 +18,7 @@ nummonth=$(date +%m) # mm
 month=$(date +%B) # Mon
 
 # Grabs the data from the currently reading rss feed and removes all HTML and tabs
-# sed -e 's/contenttoreplace/contenttoinsert/'
+# sed syntax: sed -e 's/contenttoreplace/contenttoinsert/'
 IFS=$'\n' readingfeed=$(curl --silent "$readingurl" | \
 egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
 sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
@@ -30,14 +30,14 @@ sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
 -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 tail +3 | \
-fmt -u
+fmt -u # uniform spacing
 )
 
 # Grab the bookid from READ data from the url and format it
 IFS=$'\n' readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
 sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
-fmt
+fmt -u # uniform spacing
 )
 
 # Turn the data into an array, by substituting '|' for a new-line character
