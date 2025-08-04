@@ -113,7 +113,7 @@ do
   published=${readingarr[$(($counter + 4))]}
 
   # deletes illegal ':' and '/' and unwanted '#' characters
-  cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ / - /' -e 's/#//')
+  cleantitle=$(echo "${title}" | sed -e 's/[\\\/:*?"<>|#]//g' -e 's/:\ / - /')
 
   # time of note creation, cut used for formatting of weekday
   creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
