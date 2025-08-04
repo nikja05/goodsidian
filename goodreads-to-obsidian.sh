@@ -143,9 +143,10 @@ Link to reference:
   fi
 done
 
+# if a book was read, change the tag and add read date
 for i in ${!readarr[@]}
 do
-  
+  # return path of book with matching bookid
   readbookpath=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "bookid: \"${readarr[$i]}\"")
 
   if [ "$readbookpath" != "" ]; then
@@ -153,7 +154,6 @@ do
     sed -i -e '/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}' "$readbookpath"
     sed -i -e 's/#currently-reading/#read/' "$readbookpath"
   fi
-
 done
 
 
