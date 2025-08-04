@@ -144,6 +144,7 @@ Link to reference:
 done
 
 # if a book was read, change the tag and add read date
+updatecounter=0
 for i in ${!readarr[@]}
 do
   # return path of book with matching bookid
@@ -153,9 +154,18 @@ do
     year=$(date +%Y)
     sed -i -e '/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}' "$readbookpath"
     sed -i -e 's/#currently-reading/#read/' "$readbookpath"
+    ((updatecounter++))
   fi
 done
 
+# user friendly update message
+if (( updatecounter > 1 )); then
+  echo "$updatecounter books updated."
+elif (( updatecounter == 1 )); then
+  echo "1 book updated."
+else
+  echo "No new read books."
+fi
 
 ifcurrread=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "#currently-reading")
 
