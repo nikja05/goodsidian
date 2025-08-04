@@ -9,15 +9,16 @@ readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN
 # URL for "Read":
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
-# Enter the path to your Vault
+# enter path to your Vault
 vaultpath="G:\My Drive\personal\Second Brain\200 test"
 
-# Get current date and assign to variable
+# gets current date and assign to variable
 year=$(date +%Y) # yyyy
 nummonth=$(date +%m) # mm
 month=$(date +%B) # Mon
 
-# Grabs the data from the currently reading rss feed and removes all HTML and tabs
+# grabs title, cover image, author name, publishing year and book id
+# from 'currently reading' RSS feed and removes all HTML and tabs
 # sed syntax: sed -e 's/contenttoreplace/contenttoinsert/'
 IFS=$'\n' readingfeed=$(curl --silent "$readingurl" | \
 egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
@@ -33,18 +34,18 @@ tail +3 | \
 fmt -u # uniform spacing
 )
 
-# Grab the bookid from READ data from the url and format it
+# grabs book id from 'read' RSS feed and removes all HTML and tabs
 IFS=$'\n' readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
 sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 fmt -u # uniform spacing
 )
 
-# Turn the data into an array, by substituting '|' for a new-line character
+# turns the data into an array, by substituting '|' for a new-line character
 readingarr=($(echo $readingfeed | tr "|" "\n")) # outer pair of brackets is necessary for array definition
 readarr=($(echo $readfeed | tr "|" "\n"))
 
-# Remove tabs at the beginning and end of item
+# removes tabs at the beginning and end of item
 for (( i = 0 ; i < ${#readingarr[@]} ; i++ ))
 do
   readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
@@ -54,33 +55,33 @@ do
   readarr[$i]=$(echo "${readarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 
-# Get the amount of books by dividing array by 5
+# gets the amount of books by dividing array by 5
 readingamount=$((${#readingarr[@]} / 5))
 
-# Check if book is in directory
+# checks if book is in directory
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
-  # Create a temporary counter to loop through books
-  # Multiplied by 5 because there are five fields
+  # temporary counter variable
+  # multiplication necessary -> 5 fields per book
   counter=$(($i * 5))
 
   # Sets bookid
   bookid=${readingarr[$(($counter + 1))]}
 
-  # grep scans all notes for an appearance of bookid
+  # grep scans all notes in vaultpath for an appearance of bookid
   if grep -q "${bookid}" -r "${vaultpath}"; then
-    # code if found
-    unset readingarr["$counter"]
+    # removes the book from the array
+    unset readingarr[$counter]
     unset readingarr[$(($counter + 1))]
     unset readingarr[$(($counter + 2))]
     unset readingarr[$(($counter + 3))]
     unset readingarr[$(($counter + 4))]
-    echo "Book '${readingarr["$counter"]}' already exists"
+    echo "Book '${readingarr[$counter]}' already exists"
   fi
 done
 
 # readingarr now might have gaps, because of unset values
-# Creates an updated array with no gaps
+# creates an updated array with no gaps
 for i in "${!readingarr[@]}"
 do
     new_array+=("${readingarr[i]}")
@@ -88,7 +89,7 @@ done
 readingarr=("${new_array[@]}")
 unset new_array
 
-# Get the amount of books by dividing array by 5
+# gets the amount of (remaining) books by dividing array by 5
 readingamount=$((${#readingarr[@]} / 5))
 
 if (("$readingamount" == 0)); then
@@ -97,27 +98,27 @@ else
   echo "Starting Process..."
 fi
 
-# Creates a note for each book
+# creates a note for each book
 for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
-  # Create a temporary counter to loop through books
-  # Multiplied by 5 because there are five fields
+  # temporary counter variable
+  # multiplication necessary -> 5 fields per book
   counter=$(($i * 5))
 
-  # Set variables
-  title=${readingarr["$counter"]}
+  # sets variables
+  title=${readingarr[$counter]}
   bookid=${readingarr[$(($counter + 1))]}
   imglink=${readingarr[$(($counter + 2))]}
   author=${readingarr[$(($counter + 3))]}
   published=${readingarr[$(($counter + 4))]}
 
-  # Delete illegal (':' and '/') and unwanted ('#') characters
+  # deletes illegal ':' and '/' and unwanted '#' characters
   cleantitle=$(echo "${title}" | sed -e 's/\\//' -e 's/:\ / - /' -e 's/#//')
 
-  # Time of note creation
+  # time of note creation, cut used for formatting of weekday
   creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
 
-  # Write the contents for the book file
+  # writes the contents for the book file
   if [[ "$cleantitle" == "" ]]; then
     echo "Error! Failed to create note due to faulty title."
   else
@@ -137,7 +138,7 @@ Link to reference:
 
 ---
 " >> "${vaultpath}/${cleantitle}.md"
-    # Display a notification when file was created
+    # displays a notification when file was created
     echo "Booknote created with title '${cleantitle}'"
   fi
 done
