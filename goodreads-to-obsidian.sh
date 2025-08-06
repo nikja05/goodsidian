@@ -37,7 +37,8 @@ fmt -u # uniform spacing
 
 # grabs book id from 'read' RSS feed and removes all HTML and tabs
 echo "Getting 'Read' data."
-IFS=$'\n' readfeed=$(curl --silent "$readurl" | egrep 'book_id' | \
+IFS=$'\n' readfeed=$(curl --silent "$readurl" | \
+egrep 'book_id' | \
 sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
 -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
 fmt -u # uniform spacing
