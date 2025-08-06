@@ -10,7 +10,7 @@ readingurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN
 readurl="https://www.goodreads.com/review/list_rss/176913806?key=ij6FlDffUwmN8UEhNnLYPk0ln4fWPvaqAZTkc2wLwZ-fcaTM&shelf=read"
 
 # enter path to your Vault
-vaultpath="G:\My Drive\personal\Second Brain\200 test"
+vaultpath="G:\My Drive\personal\Second Brain\100 Reference Notes"
 
 # gets current date and assign to variable
 year=$(date +%Y) # yyyy
@@ -103,54 +103,53 @@ if (("$readingamount" == 0)); then
 else
   echo "--- Starting Process ---"
   echo
+  # creates a note for each book
+  for (( i = 0 ; i < ${readingamount} ; i++ ))
+  do
+    # temporary counter variable
+    # multiplication necessary -> 5 fields per book
+    counter=$(($i * 5))
+
+    # sets variables
+    title=${readingarr[$counter]}
+    bookid=${readingarr[$(($counter + 1))]}
+    imglink=${readingarr[$(($counter + 2))]}
+    author=${readingarr[$(($counter + 3))]}
+    published=${readingarr[$(($counter + 4))]}
+
+    # deletes illegal ':' and '/' and unwanted '#' characters
+    cleantitle=$(echo "${title}" | sed -e 's/[\\\/:*?"<>|#]//g' -e 's/:\ / - /')
+
+    # time of note creation, cut used for formatting of weekday
+    creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
+
+    # writes the contents for the book file
+    if [[ "$cleantitle" == "" ]]; then
+      echo "Error! Failed to create note due to faulty title."
+      echo
+    else
+      echo "---
+  bookid: '${bookid}'
+  ---
+  ${creationdate}
+  Status: #reference #currently-reading
+  Tags: [[Book]]
+  Author: [[${author}]]
+  Year published: ${published}
+  Universe/Series: *ADD SERIES*
+  Link to reference:
+  # 📚${cleantitle}
+
+  '![Cover|150](${imglink})'
+
+  ---
+  " >> "${vaultpath}/${cleantitle}.md"
+      # displays a notification when file was created
+      echo "Booknote created with title '${cleantitle}'"
+      echo
+    fi
+  done
 fi
-
-# creates a note for each book
-for (( i = 0 ; i < ${readingamount} ; i++ ))
-do
-  # temporary counter variable
-  # multiplication necessary -> 5 fields per book
-  counter=$(($i * 5))
-
-  # sets variables
-  title=${readingarr[$counter]}
-  bookid=${readingarr[$(($counter + 1))]}
-  imglink=${readingarr[$(($counter + 2))]}
-  author=${readingarr[$(($counter + 3))]}
-  published=${readingarr[$(($counter + 4))]}
-
-  # deletes illegal ':' and '/' and unwanted '#' characters
-  cleantitle=$(echo "${title}" | sed -e 's/[\\\/:*?"<>|#]//g' -e 's/:\ / - /')
-
-  # time of note creation, cut used for formatting of weekday
-  creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
-
-  # writes the contents for the book file
-  if [[ "$cleantitle" == "" ]]; then
-    echo "Error! Failed to create note due to faulty title."
-    echo
-  else
-    echo "---
-bookid: '${bookid}'
----
-${creationdate}
-Status: #reference #currently-reading
-Tags: [[Book]]
-Author: [[${author}]]
-Year published: ${published}
-Universe/Series: *ADD SERIES*
-Link to reference:
-# 📚${cleantitle}
-
-'![Cover|150](${imglink})'
-
----
-" >> "${vaultpath}/${cleantitle}.md"
-    # displays a notification when file was created
-    echo "Booknote created with title '${cleantitle}'"
-    echo
-  fi
-done
 
 # if a book was read, change the tag and add read date
 echo "--- Updating read books ---"
@@ -165,7 +164,7 @@ do
     # if the read book was already marked as read, skip to the next book
     if [ $(echo $(grep -ci "#read" "$readbookpath")) == "0" ]; then
       year=$(date +%Y)
-      sed -i -e '/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}' "$readbookpath"
+      sed -i -e "/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}" "$readbookpath"
       sed -i -e 's/#currently-reading/#read/' "$readbookpath"
       ((updatecounter++))
     fi
