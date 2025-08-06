@@ -139,7 +139,7 @@ else
   Year published: ${published}
   Universe/Series: *ADD SERIES*
   Link to reference:
-  # 📚${cleantitle}
+  # 📚${title}
 
   '![Cover|150](${imglink})'
 
