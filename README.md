@@ -40,14 +40,12 @@ If you have not yet installed [Git Bash](https://www.geeksforgeeks.org/git/worki
 After having downloaded and modified the script, go into your Git Bash shell and navigate to the folder you've saved the script in.
 
 Type the following into the console
-```shell
-user@name:~/your/directory ./goodreads-to-obisidian.sh
+
+```bash
+./goodreads-to-obisidian.sh
 ```
 and hit enter.
-
-Otherwise, set the script as executable and run it. It might take a bit but then should notify you on new books read or currently-reading book notes created.
-
-Forks and improvements are welcome. If you have a problem, don't hesitate to raise an issue or shoot me a message at hi@joschuasgarden.com. I'll do my best to help out.
+Messages on the screen will inform you about what's happening behind the scenes.
 
 ## Detailed script commentary
 
