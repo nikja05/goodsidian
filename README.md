@@ -1,46 +1,49 @@
 # Goodsidian 
-Goodsidian takes updates to your shelves on [Goodreads](https://www.goodreads.com/) and formats them to a note in [Obsidian](https://obsidian.md/).
+Goodsidian takes information from your shelves on [Goodreads](https://www.goodreads.com/) and formats them to notes in [Obsidian](https://obsidian.md/).
 
-**FYI**: This script is a fork, modified to work with Windows.
+**FYI**: This script is a fork, modified to work with Bash on Windows.
 
 ## Overview
-Goodsidian extracts data from your "currently-reading" and "read" Goodreads rss feeds. That data then gets formatted and creates (if a new book) or updates (if book is read) a note in your Obsidian vault.
+Goodsidian extracts data from your "currently-reading" and "read" Goodreads RSS feeds. That data then gets formatted and creates (new book) or updates (read book) a note in your Obsidian vault.
 
 ![Goodsidian overview picture](https://github.com/selfire1/goodsidian/blob/master/images/g-to-obs.png?raw=true)
 
 
-**Disclaimer**: Never run a script without knowing what it does. Make sure you understand the script and back up your vault. I use this script on my own vault but cannot guarantee no data losses or unintended changes.
-
+**Disclaimer**: Never run a script without knowing what it does. Make sure you understand the script and back up your vault. I use this script on my own vault but it is not guaranteed that no data will be lost or unintended changes will be made.
 
 ## Variables
-You can find the url to your Goodreads RSS feed by navigating to one of your shelfes and clicking the "RSS" button at the bottom of the page.
-* for `readingurl` enter the Goodreads rss url for the "currently-reading" shelf
-* for `readurl` enter the Goodreads rss url for the "read" shelf
-* for `vaultpath` enter the path to your vault
+You can find the URL to your Goodreads RSS feed by navigating to the corresponding shelf and clicking the "RSS" button at the bottom of the page.
+* for `readingurl` enter the Goodreads RSS URL for the "currently-reading" shelf
+* for `readurl` enter the Goodreads RSS URL for the "read" shelf
+* for `vaultpath` enter the path to your vault, like in the example
 
-## Name of your bookshelf
-Open your Goodreads rss feed. It will say something like "Joschua's bookshelf" in the beginning. Replace `Joschua.s bookshelf` in line 24 in the script with the name of your bookshelf.
+## Change the name of your bookshelf
+Open your Goodreads RSS feed. It will say something like "{yournamehere}'s bookshelf" in the beginning. Replace `Nikolaj.s bookshelf` in line 24 in the script with the name of your bookshelf (notice the dot).
 
 ## Adapt your format
 ### Currently reading
-For a book that's being currently read the default output will look like this:
-
-![Format of a currently reading book note](https://github.com/selfire1/goodsidian/blob/master/images/reading%20example.png?raw=true)
-
-For your use case you will surely want to change this. You can do so with the following variables:
-* `${title}`: Self-explanatory. The title.
-* `${author}`: The author.
-* `${bookid}`: The Goodreads bookid. Keep this in your frontmatter, so that the script can check for books marked as "read"
+For your use case you will surely want to change the look of the output. You can do so with the following variables:
+* `${title}`: Title of the book.
+* `${bookid}`: The Goodreads bookid. The script checks for a line containing 'bookid: xxx', so it's required to have a line identical to that in the note.
 * `${imglink}`: The link to the book cover.
-* `${pub}`: Year published
+* `${author}`: The author's name.
+* `${published}`: Year of publishing.
 
 ### Read
-When a book is marked 'read' in the Goodreads rss feed, the script checks if a note has a corresponding Goodreads bookid. If so, it removes the `#currently-reading` tag, adds a `#read` tag. It also appends two lines for "Year read" and "Month read" after the "Year published" line.
+When a book appears in the 'read' RSS feed, the script checks if a note has a corresponding Goodreads bookid. If so, it replaces the `#currently-reading` tag with a `#read` tag. It also appends the line "Year read: " after the "Year published: " line.
 
-So when tinkering with the formatting, be aware that the script targets the bookid and the "Year read" lines. If you delete or change these around, the script might have unintended consquences.
+When tinkering with the formatting, be aware that the script targets the bookid and the "Year read" lines. If you delete or change these around, check if you need to change other lines as well.
 
 ## Running the script
-If you're unfamiliar with file navigation and executing a script, [here](https://joschuasgarden.com/Shell#File+navigation) is a short overview.
+If you have not yet installed [Git Bash](https://www.geeksforgeeks.org/git/working-on-git-bash/), do so [here](https://gitforwindows.org/).
+
+After having downloaded and modified the script, go into your Git Bash shell and navigate to the folder you've saved the script in.
+
+Type the following into the console
+```shell
+user@name:~/your/directory ./goodreads-to-obisidian.sh
+```
+and hit enter.
 
 Otherwise, set the script as executable and run it. It might take a bit but then should notify you on new books read or currently-reading book notes created.
 
