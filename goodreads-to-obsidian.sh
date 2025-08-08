@@ -118,8 +118,9 @@ else
     author=${readingarr[$(($counter + 3))]}
     published=${readingarr[$(($counter + 4))]}
 
-    # deletes illegal ':' and '/' and unwanted '#' characters
-    cleantitle=$(echo "${title}" | sed -e 's/[\\\/:*?"<>|#]//g' -e 's/:\ / - /')
+    # replaces illegal ':' with '-'
+    # removes all other illegal characters
+    cleantitle=$(echo "${title}" | sed -e 's/:\ / - /' -e 's/[\\\/:*?"<>|#]//g')
 
     # time of note creation, cut used for formatting of weekday
     creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
@@ -130,21 +131,21 @@ else
       echo
     else
       echo "---
-  bookid: '${bookid}'
-  ---
-  ${creationdate}
-  Status: #reference #currently-reading
-  Tags: [[Book]]
-  Author: [[${author}]]
-  Year published: ${published}
-  Universe/Series: *ADD SERIES*
-  Link to reference:
-  # 📚${title}
+bookid: '${bookid}'
+---
+${creationdate}
+Status: #reference #currently-reading
+Tags: [[Book]]
+Author: [[${author}]]
+Year published: ${published}
+Universe/Series: *ADD SERIES*
+Link to reference:
+# 📚${title}
 
-  '![Cover|150](${imglink})'
+![Cover|150](${imglink})
 
-  ---
-  " >> "${vaultpath}/${cleantitle}.md"
+---
+" >> "${vaultpath}/${cleantitle}.md"
       # displays a notification when file was created
       echo "Booknote created with title '${cleantitle}'"
       echo
@@ -168,7 +169,7 @@ do
       sed -i -e "/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}" "$readbookpath"
       sed -i -e 's/#currently-reading/#read/' "$readbookpath"
       ((updatecounter++))
-    fi
+    fi;
   fi
 done
 
