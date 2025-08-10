@@ -165,8 +165,7 @@ do
   if [ "$readbookpath" != "" ]; then
     # if the read book was already marked as read, skip to the next book
     if [ $(echo $(grep -ci "#read" "$readbookpath")) == "0" ]; then
-      year=$(date +%Y)
-      sed -i -e "/Year published: [0-9][0-9][0-9][0-9]/a Year read: ${year}" "$readbookpath"
+      sed -i -e "/Year published: [0-9][0-9][0-9][0-9]/a Date read: ${month} ${year}" "$readbookpath"
       sed -i -e 's/#currently-reading/#read/' "$readbookpath"
       ((updatecounter++))
     fi;
