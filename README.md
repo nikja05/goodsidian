@@ -1,7 +1,7 @@
 # Goodsidian 
 Goodsidian takes information from your shelves on [Goodreads](https://www.goodreads.com/) and formats them to notes in [Obsidian](https://obsidian.md/).
 
-**FYI**: This script is a fork, modified to work with Bash on Windows.
+This script is made to work on Bash for Windows. Feedback and contributions are very welcome :)
 
 ## Overview
 Goodsidian extracts data from your "currently-reading" and "read" Goodreads RSS feeds. That data then gets formatted and creates (new book) or updates (read book) a note in your Obsidian vault.
@@ -49,228 +49,214 @@ Messages on the screen will inform you about what's happening behind the scenes.
 
 ## Detailed script commentary
 
-First, the script sets the urls and path to vault as variables. It also assigns the current time to variables.
+First, the script sets the URLs and the path to your vault as variables. It also assigns the current time to variables.
 ```bash
-# url for "Currently reading":
-url="https://www.goodreads.com/url-to-your-rss-feed-shelf=currently-reading"
-# url for "Read":
-readurl="https://www.goodreads.com/url-to-your-rss-feed-shelf=read"
+# URL for "Currently reading":
+readingurl="your_url"
+# URL for "Read":
+readurl="your_url"
 
-# Enter the path to your Vault
-vaultpath="Path/to/your/vault"
+# enter path to your Vault
+vaultpath="path_to_your_vault"
 
-
-# Assign times to variables
-year=$(date +%Y)
-nummonth=$(date +%m)
-month=$(date +%B)
+# gets current date and assign to variable
+year=$(date +%Y) # yyyy
+nummonth=$(date +%m) # mm
+month=$(date +%B) # Mon
 ```
 
-Next up the script grabs the data from the rss feed and takes out the items that we need. First from the "currently-reading" sheld and then from the "read" shelf:
+Next up, the script grabs the data from the RSS feed and filters out the needed items. First from the "currently-reading" shelf and then from the "read" shelf:
 ```bash
-# This grabs the data from the currently reading rss feed and formats it
-IFS=$'\n' feed=$(curl --silent "$url" | grep -E '(title>|book_large_image_url>|author_name>|book_published>|book_id>)' | \
-sed -e 's/<!\[CDATA\[//' -e 's/\]\]>//' \
--e 's/Joschua.s bookshelf: currently-reading//' \
--e 's/<book_large_image_url>//' -e 's/<\/book_large_image_url>/ | /' \
--e 's/<title>//' -e 's/<\/title>/ | /' \
--e 's/<author_name>//' -e 's/<\/author_name>/ | /' \
--e 's/<book_published>//' -e 's/<\/book_published>/ | /' \
--e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
--e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
+# grabs title, cover image, author name, publishing year and book id
+# from 'currently reading' RSS feed and removes all HTML and tabs
+# sed syntax: sed -e 's/contenttoreplace/contenttoinsert/'
+echo "Getting 'Currently Reading' data."
+IFS=$'\n' readingfeed=$(curl --silent "$readingurl" | \
+egrep 'title|book_large_image_url|author_name|book_published|book_id' | \
+...
 tail +3 | \
-fmt
+fmt -u # uniform spacing
 )
 
-# Grab the bookid from READ data from the url and format it
-IFS=$'\n' readfeed=$(curl --silent "$readurl" | grep -E '(book_id>)' | \
-sed -e 's/<book_id>//' -e 's/<\/book_id>/ | /' \
--e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
-fmt
+# grabs book id from 'read' RSS feed and removes all HTML and tabs
+echo "Getting 'Read' data."
+IFS=$'\n' readfeed=$(curl --silent "$readurl" | \
+egrep 'book_id' | \
+...
+fmt -u # uniform spacing
 )
 ```
 
-Next up we turn the data into an array, a list essentially. Each item that we pulled from the rss gets split up. We also remove leading and trailing whitespace.
+Next up we turn the data into an array. The items that were pulled from the RSS feed get split up, and the whitespace gets removed.
 ```bash
-# Turn the data into an array
-arr=($(echo $feed | tr "|" "\n")) # CURRENTLY-READING
-readarr=($(echo $readfeed | tr "|" "\n")) # READ
+# turns the data into an array, by substituting '|' for a new-line character
+echo "Putting the data into an array."
+readingarr=($(echo $readingfeed | tr "|" "\n")) # outer pair of brackets is necessary for array definition
+readarr=($(echo $readfeed | tr "|" "\n"))
 
-# Remove whitespace on each element: CURRENTLY-READING
-for (( i = 0 ; i < ${#arr[@]} ; i++ ))
+# removes tabs at the beginning and end of item
+for (( i = 0 ; i < ${#readingarr[@]} ; i++ ))
 do
-  arr[$i]=$(echo "${arr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+  readingarr[$i]=$(echo "${readingarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
-
-# Remove whitespace on each element: READ
 for (( i = 0 ; i < ${#readarr[@]} ; i++ ))
 do
   readarr[$i]=$(echo "${readarr[$i]}" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 done
 ```
 
-Since there are five elements we extracted (Title, bookid, author, image link and year published) we can divide the length of our list by five and get the amount of new books.
+Since there are five extracted elements (title, bookid, author, image link and year published) we can divide the length of our list by five and get the amount of new books.
+```bash
+# gets the amount of books by dividing array by 5
+readingamount=$((${#readingarr[@]} / 5))
+```
 
-Then we start a loop for the amount of new books. In each iteration we check if a note for this book exists already (by checking looking for a note with corresponding bookid). If there is one, we delete the book from our array since we don't need a second note on a book.
+A loop is started, that on each iteration checks if a note for the current book exists already (by checking looking for a note with the corresponding bookid). If there is one, the book is deleted from the array (so no duplicates appear).
 
 ```bash
-# Get the amount of books by dividing array by 5
-bookamount=$( expr "${#arr[@]}" / 5)
-
-for (( i = 0 ; i < ${bookamount} ; i++ ))
+# checks if book is in directory, otherwise removes it
+echo "Removing books that already have a note:"
+for (( i = 0 ; i < ${readingamount} ; i++ ))
 do
-  # Create a temporary counter to loop through books
-  counter=$( expr "$i" \* 5)
+  # temporary counter variable
+  # multiplication necessary -> 5 fields per book
+  counter=$(($i * 5))
 
-  # Set variables
-  bookid=${arr[$( expr "$counter" + 1)]}
+  # Sets bookid
+  bookid=${readingarr[$(($counter + 1))]}
 
-# Check if book already exists in note by bookid
-    
-    if grep -q "${bookid}" -r "${vaultpath}"
-      then
-        # code if found
-          unset arr["$counter"]
-          unset arr[$( expr "$counter" + 1)]
-          unset arr[$( expr "$counter" + 2)]
-          unset arr[$( expr "$counter" + 3)]
-          unset arr[$( expr "$counter" + 4)]
-
-       # code if not found
-
-     fi
+  # grep scans all notes in vaultpath for an appearance of bookid
+  if grep -q "${bookid}" -r "${vaultpath}"; then
+    # removes the book from the array
+    echo "  '${readingarr[$counter]}'"
+    unset readingarr[$counter]
+    unset readingarr[$(($counter + 1))]
+    unset readingarr[$(($counter + 2))]
+    unset readingarr[$(($counter + 3))]
+    unset readingarr[$(($counter + 4))]
+  fi
 done
 ```
 
-We then have to reindex our array to find the length. By dividing through five again, we can see how many books we have left. If there are none left, a notification is shown.
+As this cleaned-up array possibly has empty spots, it has to be reindexed. By dividing through five again, we can then see how many books we have left.
 
 ```bash
-# Reindex array to take away gaps
-for i in "${!arr[@]}"; do
-    new_array+=( "${arr[i]}" )
+# readingarr now might have gaps, because of unset values
+# creates an updated array with no gaps
+echo "Cleaning up the array."
+for i in "${!readingarr[@]}"
+do
+    new_array+=("${readingarr[i]}")
 done
-arr=("${new_array[@]}")
+readingarr=("${new_array[@]}")
 unset new_array
 
-# Get the amount of books by dividing array by 5
-bookamount=$( expr "${#arr[@]}" / 5)
-
-if (( "$bookamount" == 0 )); then
-  osascript -e "display notification \"No new books found.\" with title \"Currently-reading: No update\""
-fi
+# gets the amount of (remaining) books by dividing array by 5
+readingamount=$((${#readingarr[@]} / 5))
 ```
 
-For all remaining books we set our variables. The script also deletes illegal characters (':' and '/') and unwanted ('#'). Hash characters are used by Obsidian to denote headers.
-
+If all the books have been removed from the array, no new notes will be created.
 ```bash
-# Start the loop for each book
-for (( i = 0 ; i < ${bookamount} ; i++ ))
-do
-
-  counter=$( expr "$i" \* 5)
-
-  # Set variables
-  title=${arr["$counter"]}
-  bookid=${arr[$( expr "$counter" + 1)]}
-  imglink=${arr[$( expr "$counter" + 2)]}
-  author=${arr[$( expr "$counter" + 3)]}
-  pub=${arr[$( expr "$counter" + 4)]}
-
-
-# Delete illegal (':' and '/') and unwanted ('#') characters
-cleantitle=$(echo "${title}" | sed -e 's/\///' -e 's/:/ –/' -e 's/#//')
+if (("$readingamount" == 0)); then
+  echo "Currently Reading: No new books found."
+  echo
 ```
 
-Then a booknote gets created for each new book. We show a notification for each created book.
-
+Otherwise, variables are set for the remaining books. The script also deletes illegal characters that interfere with file naming.
 ```bash
-  # Write the contents for the book file
-
-  if [[ "$cleantitle" == "" ]];
-  then
-    osascript -e "display notification \"Failed to create note due to empty array.\" with title \"Error!\""
-  else
-    echo "---
-bookid: ${bookid}
----
-
-links: [[Books MOC]]
-#currently-reading
-# ${title}
-![b|150](${imglink})
-* Type: #book/
-* Universe/Series: ADD SERIES
-* Author: [[${author}]]
-* Year published: [[${pub}]]" >> "${vaultpath}/${cleantitle}.md"
-
-    # Display a notification when creating the file
-    osascript -e "display notification \"Booknote created!\" with title \"${cleantitle//\"/\\\"}\""
-  fi
-
-done
-```
-
-Next up we get into the meat of things. We now check if any book notes that were "currently-reading" now have been read. 
-
-We take all bookids from the 'read' shelf and check if there is any note that contains them and is marked with the tag `#currently-reading`.
-
-For any that are found the `#currently-read` tag gets replaced by a `#read` tag and we also add a line for "Year read" and a line for "Month read".
-
-A notification gets displayed if anything has been found.
-
-```bash
-ifbookid=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}")
-ifcurrread=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "#currently-reading")
-
-if find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}"
-then
-  # Code if found: update read books
-  fname=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "${cbookid}")
-  sed -i '' "/Year published: \[\[[0-9][0-9][0-9][0-9]\]\]/ a\\
-  \* Year read: #read${year}" "$fname"
-  sed -i '' "/Year read: #read${year}/ a\\
-  \* Month read: [[${year}-${nummonth}-${month}|${month} ${year}]]" "$fname"
-  sed -i '' -e 's/#currently-reading/#read/' "$fname"
-
-  # Grab the name of the changed book
-  fname=$(echo ${fname} | sed 's/^.*\///' | sed 's/\.[^.]*$//')
-  osascript -e "display notification \"${fname}\" with title \"Updated read books\""
 else
- # code if not found: No new books
- osascript -e "display notification \"No new read books.\" with title \"Read: No update\""
+  echo "--- Starting Process ---"
+  echo
+  # creates a note for each book
+  for (( i = 0 ; i < ${readingamount} ; i++ ))
+  do
+    # temporary counter variable
+    # multiplication necessary -> 5 fields per book
+    counter=$(($i * 5))
+
+    # sets variables
+    title=${readingarr[$counter]}
+    bookid=${readingarr[$(($counter + 1))]}
+    imglink=${readingarr[$(($counter + 2))]}
+    author=${readingarr[$(($counter + 3))]}
+    published=${readingarr[$(($counter + 4))]}
+
+    # replaces illegal ':' with '-'
+    # removes all other illegal characters
+    cleantitle=$(echo "${title}" | sed -e 's/:\ / - /' -e 's/[\\\/:*?"<>|#]//g')
+
+    # time of note creation, cut used for formatting of weekday
+    creationdate=$(date +"%a %m-%d-%Y %H:%M" | cut -c1-2,4-)
+```
+
+Now the note creation process starts. This part is where you will most likely want to change stuff.
+```bash
+    # writes the contents for the book file
+    if [[ "$cleantitle" == "" ]]; then
+      echo "Error! Failed to create note due to faulty title."
+      echo
+    else
+      echo "---
+bookid: '${bookid}'
+---
+${creationdate}
+Status: #reference #currently-reading
+Tags: [[Book]]
+Author: [[${author}]]
+Year published: ${published}
+Universe/Series: *ADD SERIES*
+Link to reference:
+# 📚${title}
+
+![Cover|150](${imglink})
+
+---
+" >> "${vaultpath}/${cleantitle}.md"
+      # displays a notification when file was created
+      echo "Booknote created with title '${cleantitle}'"
+      echo
+    fi
+  done
 fi
+```
 
-#circle through bookid array
-  cbookid=${readarr["$i"]}
+Now the script checks if any notes that have the "#currently-reading" tag have now been read. 
 
-  # If in the path to the vault, there is a file with the current id, then …
-  if find "${vaultpath}" -not -path "*/\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}"
-  then
-  # … set variable fname to that file
-  fname=$(find "${vaultpath}" -not -path "*/\.*" -type f \( -iname "*.md" \) -print0 | xargs -0 grep -li "${cbookid}")
-    # Check if it has tag "#currently-reading"
-      if grep "#currently-reading" "${fname}"
-      then
-        # If yes, change the formatting, delete the "#currently-reading" tag
-        sed -i '' "/Year published: \[\[[0-9][0-9][0-9][0-9]\]\]/ a\\
-        \* Year read: #read${year}" "$fname"
-        sed -i '' "/Year read: #read${year}/ a\\
-        \* Month read: [[${year}-${nummonth}-${month}|${month} ${year}]]" "$fname"
-        sed -i '' -e 's/#currently-reading/#outline \/ #welcome/' "$fname"
+It checks if a bookid that is in the 'read' array, also appears in a note. If that occurs, it replaces the "#currently-reading" in that note with "#read", and inserts a line for "Date read" after "Year published"
 
-        # Grab the name of the changed book
-        declare -i updatedbooks; updatedbooks+=1
-        fname=$(echo ${fname} | sed 's/^.*\///' | sed 's/\.[^.]*$//')
-        # Show notification
-        osascript -e "display notification \"${fname}\" with title \"Updated read books\""
-      fi
+The updatecounter variable is used later to display a nice message to the user.
+
+```bash
+# if a book was read, change the tag and add read date
+echo "--- Updating read books ---"
+updatecounter=0
+for i in ${!readarr[@]}
+do
+  # return path of book with matching bookid
+  readbookpath=$(find "${vaultpath}" -type f -print0 | xargs -0 grep -li "bookid: '${readarr[$i]}'")
+
+  # add Year read and replace #currently-reading with #read
+  if [ "$readbookpath" != "" ]; then
+    # if the read book was already marked as read, skip to the next book
+    if [ $(echo $(grep -ci "#read" "$readbookpath")) == "0" ]; then
+      sed -i -e "/Year published: [0-9][0-9][0-9][0-9]/a Date read: ${month} ${year}" "$readbookpath"
+      sed -i -e 's/#currently-reading/#read/' "$readbookpath"
+      ((updatecounter++))
+    fi;
   fi
 done
+```
 
-# code if not found: No new books
-if [[ ${updatedbooks} = "" ]]
-then
-osascript -e "display notification \"No new read books.\" with title \"Read: No update\""
+At last, the script returns a message, updating the user.
+
+```bash
+# user friendly update message
+if (( updatecounter > 1 )); then
+  echo "$updatecounter books updated."
+elif (( updatecounter == 1 )); then
+  echo "1 book updated."
+else
+  echo "No new read books."
 fi
 ```
 
